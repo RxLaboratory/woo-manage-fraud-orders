@@ -416,6 +416,13 @@ if ( ! class_exists( 'WMFO_Track_Fraud_Attempts' ) ) {
 				return false;
 			}
 
+			// Do not check WooCommerce Subscriptions renewals, return
+			// Checking subscriptions renewals may generate errors in WooCommerce,
+			// and it is not needed: the user already paid at least once, this is not a Fraud attempt.
+			if ( function_exists('wcs_order_contains_subscription') ) {
+				if ( wcs_order_contains_subscription( $order, 'renewal') ) return false;
+			}
+
 			if ( $order->get_status() === 'failed' || 'failed' === $context ) {
 				// Get the allowed failed order limit, default to 5.
 				$fraud_limit = get_option( 'wmfo_black_list_allowed_fraud_attempts', 5 );
